@@ -143,6 +143,41 @@ class HighRiskWasteResponse(BaseModel):
     items: List[HighRiskWasteItem]
 
 
+class WeeklyWasteData(BaseModel):
+    total_waste_amount: float
+    avg_waste_rate: float
+    high_risk_count: int
+
+
+class WeeklyComparisonResponse(BaseModel):
+    this_week: WeeklyWasteData
+    last_week: WeeklyWasteData
+    amount_change_rate: float
+    rate_change_rate: float
+    risk_change_rate: float
+
+
+class WasteReasonItem(BaseModel):
+    name: str
+    value: float
+
+
+class WeeklyTrendItem(BaseModel):
+    week_label: str
+    waste_quantity: float
+    waste_amount: float
+    waste_rate: float
+
+
+class ProductWasteDetailResponse(BaseModel):
+    sku: str
+    product_name: str
+    category: str
+    weekly_trend: List[WeeklyTrendItem]
+    reason_distribution: List[WasteReasonItem]
+    suggestions: List[str]
+
+
 class DashboardSummary(BaseModel):
     total_stores: int
     total_products: int

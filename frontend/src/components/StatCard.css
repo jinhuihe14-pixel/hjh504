@@ -85,3 +85,16 @@
   height: 100%;
   opacity: 0.8;
 }
+
+.stat-card-clickable {
+  cursor: pointer;
+}
+
+.stat-card-clickable:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.stat-card-clickable:active {
+  transform: translateY(0);
+}

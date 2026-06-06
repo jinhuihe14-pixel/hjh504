@@ -4,153 +4,153 @@
       "sku": "SKU0001",
       "product_name": "泡面桶装",
       "category": "速食饮料",
-      "quantity": 65.0,
+      "quantity": 515.02,
       "unit": "个",
-      "last_updated": "2026-06-06T17:21:30.848131"
+      "last_updated": "2026-06-06T17:41:59.968153"
     },
     "SKU0002": {
       "sku": "SKU0002",
       "product_name": "瓶装可乐",
       "category": "速食饮料",
-      "quantity": 30.0,
+      "quantity": 564.07,
       "unit": "个",
-      "last_updated": "2026-06-06T17:21:30.848138"
+      "last_updated": "2026-06-06T17:41:59.968123"
     },
     "SKU0003": {
       "sku": "SKU0003",
       "product_name": "瓶装矿泉水",
       "category": "速食饮料",
-      "quantity": 45.0,
+      "quantity": 1422.4,
       "unit": "个",
-      "last_updated": "2026-06-06T17:21:30.848141"
+      "last_updated": "2026-06-06T17:41:59.968072"
     },
     "SKU0004": {
       "sku": "SKU0004",
       "product_name": "功能饮料",
       "category": "速食饮料",
-      "quantity": 60.0,
+      "quantity": 329.66,
       "unit": "个",
-      "last_updated": "2026-06-06T17:21:30.848142"
+      "last_updated": "2026-06-06T17:41:59.968215"
     },
     "SKU0005": {
       "sku": "SKU0005",
       "product_name": "热饮奶茶粉",
       "category": "速食饮料",
-      "quantity": 50.0,
+      "quantity": 268.48,
       "unit": "个",
-      "last_updated": "2026-06-06T17:21:30.848144"
+      "last_updated": "2026-06-06T17:41:59.968312"
     },
     "SKU0006": {
       "sku": "SKU0006",
       "product_name": "卫生纸卷",
       "category": "日用百货",
-      "quantity": 45.0,
+      "quantity": 283.02,
       "unit": "个",
-      "last_updated": "2026-06-06T17:21:30.848145"
+      "last_updated": "2026-06-06T17:41:59.968271"
     },
     "SKU0007": {
       "sku": "SKU0007",
       "product_name": "洗衣液袋装",
       "category": "日用百货",
-      "quantity": 65.0,
+      "quantity": 196.22,
       "unit": "个",
-      "last_updated": "2026-06-06T17:21:30.848147"
+      "last_updated": "2026-06-06T17:41:59.968420"
     },
     "SKU0008": {
       "sku": "SKU0008",
       "product_name": "牙刷",
       "category": "日用百货",
-      "quantity": 20.0,
+      "quantity": 223.82,
       "unit": "个",
-      "last_updated": "2026-06-06T17:21:30.848148"
+      "last_updated": "2026-06-06T17:41:59.968349"
     },
     "SKU0009": {
       "sku": "SKU0009",
       "product_name": "洗发水袋装",
       "category": "日用百货",
-      "quantity": 60.0,
+      "quantity": 132.24,
       "unit": "个",
-      "last_updated": "2026-06-06T17:21:30.848150"
+      "last_updated": "2026-06-06T17:41:59.968455"
     },
     "SKU0010": {
       "sku": "SKU0010",
       "product_name": "香皂",
       "category": "日用百货",
-      "quantity": 65.0,
+      "quantity": 304.76,
       "unit": "个",
-      "last_updated": "2026-06-06T17:21:30.848151"
+      "last_updated": "2026-06-06T17:41:59.968253"
     },
     "SKU0011": {
       "sku": "SKU0011",
       "product_name": "鲜牛奶950ml",
       "category": "冷藏鲜奶",
-      "quantity": 45.0,
+      "quantity": 230.08,
       "unit": "个",
-      "last_updated": "2026-06-06T17:21:30.848152"
+      "last_updated": "2026-06-06T17:41:59.968384"
     },
     "SKU0012": {
       "sku": "SKU0012",
       "product_name": "酸奶杯装",
       "category": "冷藏鲜奶",
-      "quantity": 20.0,
+      "quantity": 226.46,
       "unit": "个",
-      "last_updated": "2026-06-06T17:21:30.848154"
+      "last_updated": "2026-06-06T17:41:59.968331"
     },
     "SKU0013": {
       "sku": "SKU0013",
       "product_name": "巴氏鲜奶250ml",
       "category": "冷藏鲜奶",
-      "quantity": 60.0,
+      "quantity": 62.0,
       "unit": "个",
-      "last_updated": "2026-06-06T17:21:30.848155"
+      "last_updated": "2026-06-06T17:41:59.968235"
     },
     "SKU0014": {
       "sku": "SKU0014",
       "product_name": "风味酸奶",
       "category": "冷藏鲜奶",
-      "quantity": 35.0,
+      "quantity": 207.38,
       "unit": "个",
-      "last_updated": "2026-06-06T17:21:30.848156"
+      "last_updated": "2026-06-06T17:41:59.968402"
     },
     "SKU0015": {
       "sku": "SKU0015",
       "product_name": "薯片大包",
       "category": "零食",
-      "quantity": 65.0,
+      "quantity": 354.83,
       "unit": "个",
-      "last_updated": "2026-06-06T17:21:30.848158"
+      "last_updated": "2026-06-06T17:41:59.968196"
     },
     "SKU0016": {
       "sku": "SKU0016",
       "product_name": "巧克力",
       "category": "零食",
-      "quantity": 55.0,
+      "quantity": 252.39,
       "unit": "个",
-      "last_updated": "2026-06-06T17:21:30.848159"
+      "last_updated": "2026-06-06T17:41:59.968366"
     },
     "SKU0017": {
       "sku": "SKU0017",
       "product_name": "坚果混合",
       "category": "零食",
-      "quantity": 45.0,
+      "quantity": 153.89,
       "unit": "个",
-      "last_updated": "2026-06-06T17:21:30.848160"
+      "last_updated": "2026-06-06T17:41:59.968438"
     },
     "SKU0018": {
       "sku": "SKU0018",
       "product_name": "饼干盒装",
       "category": "零食",
-      "quantity": 65.0,
+      "quantity": 301.5,
       "unit": "个",
-      "last_updated": "2026-06-06T17:21:30.848162"
+      "last_updated": "2026-06-06T17:41:59.968289"
     },
     "SKU0019": {
       "sku": "SKU0019",
       "product_name": "果冻",
       "category": "零食",
-      "quantity": 40.0,
+      "quantity": 415.6,
       "unit": "个",
-      "last_updated": "2026-06-06T17:21:30.848163"
+      "last_updated": "2026-06-06T17:41:59.968176"
     },
     "SKU001": {
       "sku": "SKU001",

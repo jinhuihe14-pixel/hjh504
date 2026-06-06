@@ -33,12 +33,21 @@ const themeConfig = {
   },
 }
 
-function StatCard({ title, value, change, changeLabel = '同比', icon, theme = 'default', suffix = '' }) {
+function StatCard({ title, value, change, changeLabel = '同比', icon, theme = 'default', suffix = '', onClick, clickable = false }) {
   const config = themeConfig[theme] || themeConfig.default
   const isPositive = change !== undefined && change >= 0
 
+  const handleClick = () => {
+    if (onClick) {
+      onClick()
+    }
+  }
+
   return (
-    <div className="stat-card">
+    <div
+      className={`stat-card ${clickable || onClick ? 'stat-card-clickable' : ''}`}
+      onClick={handleClick}
+    >
       <div className="stat-card-content">
         <div className="stat-card-header">
           <span className="stat-card-title">{title}</span>

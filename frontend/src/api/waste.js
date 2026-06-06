@@ -161,7 +161,118 @@ export async function getHighRiskProducts() {
   }
 }
 
+export async function getWeeklyComparison(storeId) {
+  try {
+    const params = storeId && storeId !== 'all' ? { store_id: storeId } : {};
+    const data = await api.get('/waste/weekly-comparison', { params });
+    if (data) {
+      return data;
+    }
+    throw new Error('周对比数据为空');
+  } catch (error) {
+    console.error('获取周对比数据失败，使用模拟数据:', error);
+    return getMockWeeklyComparison();
+  }
+}
+
+function getMockWeeklyComparison() {
+  return {
+    this_week: {
+      total_waste_amount: 28650.5,
+      avg_waste_rate: 0.032,
+      high_risk_count: 12,
+    },
+    last_week: {
+      total_waste_amount: 30420.0,
+      avg_waste_rate: 0.035,
+      high_risk_count: 15,
+    },
+    amount_change_rate: -0.058,
+    rate_change_rate: -0.086,
+    risk_change_rate: -0.2,
+  };
+}
+
+export async function getProductWasteDetail(sku, storeId) {
+  try {
+    const params = storeId && storeId !== 'all' ? { store_id: storeId } : {};
+    const data = await api.get(`/waste/product-detail/${sku}`, { params });
+    if (data) {
+      return data;
+    }
+    throw new Error('商品详情数据为空');
+  } catch (error) {
+    console.error('获取商品损耗详情失败，使用模拟数据:', error);
+    return getMockProductDetail(sku);
+  }
+}
+
+function getMockProductDetail(sku) {
+  const weeklyTrend = [];
+  const today = new Date();
+  const currentWeek = Math.ceil((today - new Date(today.getFullYear(), 0, 1)) / (7 * 24 * 60 * 60 * 1000));
+  const weekNum = Math.ceil(currentWeek);
+  const baseWasteRate = 0.08 + Math.random() * 0.1;
+
+  for (let i = 3; i >= 0; i--) {
+    const w = weekNum - i;
+    const variation = (Math.random() - 0.5) * 0.03;
+    weeklyTrend.push({
+      week_label: `第${w}周`,
+      waste_quantity: Math.round(20 + Math.random() * 30),
+      waste_amount: Math.round(150 + Math.random() * 200),
+      waste_rate: Number((baseWasteRate + variation).toFixed(4)),
+    });
+  }
+
+  const totalWaste = weeklyTrend.reduce((sum, w) => sum + w.waste_amount, 0);
+  const avgRate = weeklyTrend.reduce((sum, w) => sum + w.waste_rate, 0) / weeklyTrend.length;
+
+  let reasonDistribution;
+  if (avgRate >= 0.15) {
+    reasonDistribution = [
+      { name: '过期', value: Math.round(totalWaste * 0.5) },
+      { name: '破损', value: Math.round(totalWaste * 0.3) },
+      { name: '滞销', value: Math.round(totalWaste * 0.2) },
+    ];
+  } else if (avgRate >= 0.08) {
+    reasonDistribution = [
+      { name: '过期', value: Math.round(totalWaste * 0.35) },
+      { name: '破损', value: Math.round(totalWaste * 0.35) },
+      { name: '滞销', value: Math.round(totalWaste * 0.3) },
+    ];
+  } else {
+    reasonDistribution = [
+      { name: '过期', value: Math.round(totalWaste * 0.2) },
+      { name: '破损', value: Math.round(totalWaste * 0.3) },
+      { name: '滞销', value: Math.round(totalWaste * 0.5) },
+    ];
+  }
+
+  const suggestions = [];
+  if (avgRate >= 0.15) {
+    suggestions.push('损耗率极高，建议立即大幅减少订货量');
+    suggestions.push('建议开展促销活动，加快库存周转');
+  } else if (avgRate >= 0.08) {
+    suggestions.push('损耗率偏高，建议适当减少订货量');
+    suggestions.push('建议优化安全库存设置');
+  } else {
+    suggestions.push('损耗水平正常，建议持续监控');
+  }
+
+  return {
+    sku: sku,
+    product_name: sku,
+    category: '鲜食',
+    weekly_trend: weeklyTrend,
+    reason_distribution: reasonDistribution,
+    suggestions: suggestions,
+  };
+}
+
 export default {
   getStoreWaste,
   getHighRiskProducts,
+  getWeeklyComparison,
+  getProductWasteDetail,
 };

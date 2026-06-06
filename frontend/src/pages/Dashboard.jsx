@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import StatCard from '../components/StatCard';
 import { LineChart, BarChart, PieChart } from '../components/charts';
 import { getSummary, getSalesTrend, getCategorySales, getStoreSales, getWasteTrend } from '../api/dashboard';
@@ -7,6 +8,7 @@ import { formatNumber, formatPercent, formatMoney } from '../utils/format';
 import './Dashboard.css';
 
 function Dashboard() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState(null);
   const [salesTrend, setSalesTrend] = useState(null);
@@ -80,6 +82,8 @@ function Dashboard() {
           theme: 'danger',
           change: -2.1,
           changeLabel: '较上周',
+          clickable: true,
+          onClick: () => navigate('/waste'),
         },
         {
           title: '订单满足率',
@@ -117,6 +121,8 @@ function Dashboard() {
                 change={card.change}
                 changeLabel={card.changeLabel}
                 suffix={card.suffix}
+                clickable={card.clickable}
+                onClick={card.onClick}
               />
             ))}
       </div>

@@ -8,6 +8,11 @@ from app.models.schemas import (
     WasteAnalysisItem,
     HighRiskWasteResponse,
     HighRiskWasteItem,
+    WeeklyComparisonResponse,
+    WeeklyWasteData,
+    ProductWasteDetailResponse,
+    WeeklyTrendItem,
+    WasteReasonItem,
 )
 from app.services.data_service import DataService
 
@@ -15,6 +20,27 @@ from app.services.data_service import DataService
 router = APIRouter()
 
 data_service = DataService()
+
+WASTE_REASONS = ["过期", "破损", "滞销"]
+
+
+def _calculate_change_rate(current: float, previous: float) -> float:
+    if previous == 0:
+        return 0.0
+    return round((current - previous) / previous, 4)
+
+
+def _generate_reason_distribution(waste_amount: float, waste_rate: float) -> List[WasteReasonItem]:
+    if waste_rate >= 0.15:
+        ratios = [0.5, 0.3, 0.2]
+    elif waste_rate >= 0.08:
+        ratios = [0.35, 0.35, 0.3]
+    else:
+        ratios = [0.2, 0.3, 0.5]
+    return [
+        WasteReasonItem(name=WASTE_REASONS[i], value=round(waste_amount * ratios[i], 2))
+        for i in range(3)
+    ]
 
 
 @router.get("/high-risk", response_model=HighRiskWasteResponse)
@@ -81,6 +107,164 @@ async def get_high_risk_products(
     return HighRiskWasteResponse(
         total=len(items),
         items=items,
+    )
+
+
+@router.get("/weekly-comparison", response_model=WeeklyComparisonResponse)
+async def get_weekly_comparison(
+    store_id: str = Query(None, description="门店ID，不传则查所有门店"),
+):
+    period_end = data_service.get_latest_date()
+
+    this_week_start = period_end - timedelta(days=6)
+    last_week_end = this_week_start - timedelta(days=1)
+    last_week_start = last_week_end - timedelta(days=6)
+
+    def _calc_week_data(start_date, end_date):
+        df = data_service.get_waste_data(
+            store_id=store_id,
+            start_date=start_date,
+            end_date=end_date,
+        )
+        if df.empty:
+            return WeeklyWasteData(
+                total_waste_amount=0.0,
+                avg_waste_rate=0.0,
+                high_risk_count=0,
+            )
+
+        total_waste = float(df["waste_amount"].sum())
+        total_sales = float(df["sales_amount"].sum())
+        waste_rate = total_waste / total_sales if total_sales > 0 else 0
+
+        sku_groups = df.groupby(["sku"]).agg({
+            "waste_amount": "sum",
+            "sales_amount": "sum",
+        }).reset_index()
+        sku_groups["waste_rate"] = sku_groups.apply(
+            lambda x: x["waste_amount"] / x["sales_amount"] if x["sales_amount"] > 0 else 0,
+            axis=1,
+        )
+        high_risk_count = int((sku_groups["waste_rate"] >= 0.08).sum())
+
+        return WeeklyWasteData(
+            total_waste_amount=round(total_waste, 2),
+            avg_waste_rate=round(waste_rate, 4),
+            high_risk_count=high_risk_count,
+        )
+
+    this_week_data = _calc_week_data(this_week_start, period_end)
+    last_week_data = _calc_week_data(last_week_start, last_week_end)
+
+    amount_change = _calculate_change_rate(
+        this_week_data.total_waste_amount,
+        last_week_data.total_waste_amount,
+    )
+    rate_change = _calculate_change_rate(
+        this_week_data.avg_waste_rate,
+        last_week_data.avg_waste_rate,
+    )
+    risk_change = _calculate_change_rate(
+        this_week_data.high_risk_count,
+        last_week_data.high_risk_count,
+    )
+
+    return WeeklyComparisonResponse(
+        this_week=this_week_data,
+        last_week=last_week_data,
+        amount_change_rate=amount_change,
+        rate_change_rate=rate_change,
+        risk_change_rate=risk_change,
+    )
+
+
+@router.get("/product-detail/{sku}", response_model=ProductWasteDetailResponse)
+async def get_product_waste_detail(
+    sku: str,
+    store_id: str = Query(None, description="门店ID，不传则查所有门店"),
+):
+    period_end = data_service.get_latest_date()
+    period_start = period_end - timedelta(days=27)
+
+    df = data_service.get_waste_data(
+        store_id=store_id,
+        start_date=period_start,
+        end_date=period_end,
+    )
+    df = df[df["sku"] == sku]
+
+    if df.empty:
+        return ProductWasteDetailResponse(
+            sku=sku,
+            product_name=sku,
+            category="",
+            weekly_trend=[],
+            reason_distribution=[],
+            suggestions=[],
+        )
+
+    df["date"] = pd.to_datetime(df["date"])
+    df["week"] = df["date"].dt.isocalendar().week.astype(int)
+
+    weekly_groups = df.groupby("week").agg({
+        "waste_quantity": "sum",
+        "waste_amount": "sum",
+        "sales_amount": "sum",
+    }).reset_index()
+    weekly_groups = weekly_groups.sort_values("week")
+
+    weekly_trend = []
+    for _, row in weekly_groups.iterrows():
+        waste_rate = (
+            row["waste_amount"] / row["sales_amount"]
+            if row["sales_amount"] > 0 else 0
+        )
+        weekly_trend.append(
+            WeeklyTrendItem(
+                week_label=f"第{int(row['week'])}周",
+                waste_quantity=round(float(row["waste_quantity"]), 2),
+                waste_amount=round(float(row["waste_amount"]), 2),
+                waste_rate=round(float(waste_rate), 4),
+            )
+        )
+
+    if len(weekly_trend) < 4:
+        first_week_num = weekly_groups["week"].min() if not weekly_groups.empty else period_end.isocalendar()[1]
+        while len(weekly_trend) < 4:
+            first_week_num -= 1
+            weekly_trend.insert(0, WeeklyTrendItem(
+                week_label=f"第{first_week_num}周",
+                waste_quantity=0.0,
+                waste_amount=0.0,
+                waste_rate=0.0,
+            ))
+    weekly_trend = weekly_trend[-4:]
+
+    total_waste = float(df["waste_amount"].sum())
+    total_sales = float(df["sales_amount"].sum())
+    avg_waste_rate = total_waste / total_sales if total_sales > 0 else 0
+
+    reason_distribution = _generate_reason_distribution(total_waste, avg_waste_rate)
+
+    suggestions = []
+    if avg_waste_rate >= 0.15:
+        suggestions.append("损耗率极高，建议立即大幅减少订货量")
+        suggestions.append("建议开展促销活动，加快库存周转")
+    elif avg_waste_rate >= 0.08:
+        suggestions.append("损耗率偏高，建议适当减少订货量")
+        suggestions.append("建议优化安全库存设置")
+    else:
+        suggestions.append("损耗水平正常，建议持续监控")
+
+    category = df["category"].iloc[0] if "category" in df.columns and not df.empty else ""
+
+    return ProductWasteDetailResponse(
+        sku=sku,
+        product_name=sku,
+        category=category,
+        weekly_trend=weekly_trend,
+        reason_distribution=reason_distribution,
+        suggestions=suggestions,
     )
 
 

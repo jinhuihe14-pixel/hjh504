@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import StatCard from '../components/StatCard';
 import BarChart from '../components/charts/BarChart';
 import LineChart from '../components/charts/LineChart';
+import PieChart from '../components/charts/PieChart';
 import { STORES } from '../utils/constants';
 import { formatMoney, formatPercent, formatNumber } from '../utils/format';
-import { getHighRiskProducts, getStoreWaste } from '../api/waste';
+import { getHighRiskProducts, getStoreWaste, getWeeklyComparison, getProductWasteDetail } from '../api/waste';
 import './Waste.css';
 
 const mockWasteTrend = Array.from({ length: 30 }, (_, i) => {
@@ -48,11 +49,21 @@ function Waste() {
   const [dateRange, setDateRange] = useState('30');
   const [highRiskData, setHighRiskData] = useState(null);
   const [storeWasteData, setStoreWasteData] = useState(null);
+  const [weeklyComparison, setWeeklyComparison] = useState(null);
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [productDetail, setProductDetail] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       try {
+        const [comparisonData] = await Promise.all([
+          getWeeklyComparison(selectedStore === 'all' ? null : selectedStore),
+        ]);
+        setWeeklyComparison(comparisonData);
+
         if (selectedStore === 'all') {
           const data = await getHighRiskProducts();
           setHighRiskData(data);
@@ -103,6 +114,251 @@ function Waste() {
     return riskLevelConfig[level] || riskLevelConfig.medium;
   };
 
+  const handleViewDetail = async (product) => {
+    setSelectedProduct(product);
+    setDetailModalVisible(true);
+    setDetailLoading(true);
+    try {
+      const sku = product.sku || product.sku_id;
+      const detail = await getProductWasteDetail(sku, selectedStore === 'all' ? null : selectedStore);
+      setProductDetail(detail);
+    } catch (error) {
+      console.error('获取商品详情失败:', error);
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const closeDetailModal = () => {
+    setDetailModalVisible(false);
+    setSelectedProduct(null);
+    setProductDetail(null);
+  };
+
+  const renderWeeklyComparison = () => {
+    if (!weeklyComparison) return null;
+
+    const { this_week, last_week, amount_change_rate, rate_change_rate, risk_change_rate } = weeklyComparison;
+
+    const comparisonCards = [
+      {
+        title: '总损耗金额',
+        value: formatMoney(this_week.total_waste_amount),
+        change: Number((amount_change_rate * 100).toFixed(1)),
+        changeLabel: '环比',
+        icon: '💰',
+        theme: 'danger',
+      },
+      {
+        title: '综合损耗率',
+        value: formatPercent(this_week.avg_waste_rate),
+        suffix: '',
+        change: Number((rate_change_rate * 100).toFixed(1)),
+        changeLabel: '环比',
+        icon: '📊',
+        theme: 'warning',
+      },
+      {
+        title: '高风险商品数',
+        value: this_week.high_risk_count,
+        suffix: '个',
+        change: Number((risk_change_rate * 100).toFixed(1)),
+        changeLabel: '环比',
+        icon: '⚠️',
+        theme: 'danger',
+      },
+    ];
+
+    return (
+      <div className="weekly-comparison-section">
+        <div className="section-header">
+          <h3 className="section-title">周对比分析</h3>
+          <span className="section-subtitle">本周 vs 上周</span>
+        </div>
+        <div className="weekly-comparison-cards">
+          {comparisonCards.map((card, index) => (
+            <div key={index} className="comparison-card">
+              <div className="comparison-card-header">
+                <span className="comparison-card-title">{card.title}</span>
+                <span className="comparison-card-icon">{card.icon}</span>
+              </div>
+              <div className="comparison-card-value" style={{ color: card.theme === 'danger' ? 'var(--danger-color)' : card.theme === 'warning' ? 'var(--warning-color)' : 'var(--primary-color)' }}>
+                {card.value}
+                {card.suffix && <span className="comparison-card-suffix">{card.suffix}</span>}
+              </div>
+              <div className="comparison-card-change">
+                <span className={`change-arrow ${card.change >= 0 ? 'up' : 'down'}`}>
+                  {card.change >= 0 ? '↑' : '↓'}
+                </span>
+                <span className={`change-value ${card.change >= 0 ? 'positive' : 'negative'}`}>
+                  {Math.abs(card.change)}%
+                </span>
+                <span className="change-label">{card.changeLabel}</span>
+              </div>
+              <div className="comparison-card-last-week">
+                上周：{card.title === '总损耗金额' ? formatMoney(last_week.total_waste_amount) :
+                  card.title === '综合损耗率' ? formatPercent(last_week.avg_waste_rate) :
+                  `${last_week.high_risk_count}个`}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderDetailModal = () => {
+    if (!detailModalVisible || !selectedProduct) return null;
+
+    const productName = selectedProduct.name || selectedProduct.product_name || selectedProduct.sku;
+    const riskConfig = getRiskConfig(selectedProduct.risk_level || selectedProduct.riskLevel);
+
+    const trendChartData = productDetail?.weekly_trend?.length
+      ? [{
+          name: '损耗率',
+          data: productDetail.weekly_trend.map((item) => Number((item.waste_rate * 100).toFixed(2))),
+          color: '#ef4444',
+        }]
+      : [];
+
+    const trendXAxis = productDetail?.weekly_trend?.map((item) => item.week_label) || [];
+
+    const reasonData = productDetail?.reason_distribution || [
+      { name: '过期', value: 0 },
+      { name: '破损', value: 0 },
+      { name: '滞销', value: 0 },
+    ];
+
+    return (
+      <div className="modal-overlay" onClick={closeDetailModal}>
+        <div className="modal-content modal-large" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header">
+            <div className="modal-title-section">
+              <h3 className="modal-title">商品损耗详情</h3>
+              <span className="modal-product-name">{productName}</span>
+            </div>
+            <button className="modal-close-btn" onClick={closeDetailModal}>
+              ×
+            </button>
+          </div>
+
+          {detailLoading ? (
+            <div className="modal-loading">
+              <div className="loading-spinner" />
+              <span>加载中...</span>
+            </div>
+          ) : (
+            <div className="modal-body">
+              <div className="detail-basic-info">
+                <div className="detail-info-item">
+                  <span className="info-label">SKU</span>
+                  <span className="info-value">{selectedProduct.sku}</span>
+                </div>
+                <div className="detail-info-item">
+                  <span className="info-label">品类</span>
+                  <span className="info-value">{productDetail?.category || selectedProduct.category_name || selectedProduct.category || '-'}</span>
+                </div>
+                <div className="detail-info-item">
+                  <span className="info-label">风险等级</span>
+                  <span
+                    className="risk-tag"
+                    style={{
+                      color: riskConfig.color,
+                      backgroundColor: riskConfig.bgColor,
+                    }}
+                  >
+                    {riskConfig.label}风险
+                  </span>
+                </div>
+              </div>
+
+              <div className="detail-section">
+                <h4 className="detail-section-title">近 4 周损耗率趋势</h4>
+                {trendChartData[0]?.data?.length > 0 ? (
+                  <LineChart
+                    data={trendChartData}
+                    xAxisData={trendXAxis}
+                    legend={['损耗率(%)']}
+                    smooth
+                    areaStyle
+                    height={240}
+                  />
+                ) : (
+                  <div className="empty-chart">暂无数据</div>
+                )}
+              </div>
+
+              <div className="detail-grid">
+                <div className="detail-section">
+                  <h4 className="detail-section-title">每周损耗明细</h4>
+                  <div className="weekly-detail-list">
+                    {productDetail?.weekly_trend?.length ? (
+                      productDetail.weekly_trend.map((item, index) => (
+                        <div key={index} className="weekly-detail-item">
+                          <span className="week-label">{item.week_label}</span>
+                          <div className="week-stats">
+                            <span>损耗量：{formatNumber(item.waste_quantity)}件</span>
+                            <span>损耗金额：{formatMoney(item.waste_amount)}</span>
+                            <span>损耗率：{formatPercent(item.waste_rate)}</span>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="empty-list">暂无数据</div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="detail-section">
+                  <h4 className="detail-section-title">损耗原因分布</h4>
+                  {reasonData[0]?.value > 0 ? (
+                    <PieChart
+                      data={reasonData}
+                      ring
+                      height={240}
+                      showLabel={false}
+                      labelPosition="outside"
+                    />
+                  ) : (
+                    <div className="empty-chart">暂无数据</div>
+                  )}
+                  <div className="reason-legend">
+                    {reasonData.map((item, index) => (
+                      <div key={index} className="reason-legend-item">
+                        <span
+                          className="legend-dot"
+                          style={{
+                            backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6'][index % 3],
+                          }}
+                        />
+                        <span className="legend-name">{item.name}</span>
+                        <span className="legend-value">
+                          {formatMoney(item.value)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="detail-section">
+                <h4 className="detail-section-title">优化建议</h4>
+                <div className="suggestion-list-detail">
+                  {(productDetail?.suggestions?.length ? productDetail.suggestions : [selectedProduct.suggestion || '建议持续关注损耗变化']).map((suggestion, index) => (
+                    <div key={index} className="suggestion-item-detail">
+                      <span className="suggestion-icon-detail">💡</span>
+                      <span className="suggestion-text-detail">{suggestion}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="page-container">
@@ -148,6 +404,8 @@ function Waste() {
           </div>
         </div>
       </div>
+
+      {renderWeeklyComparison()}
 
       <div className="stat-cards-row">
         <StatCard
@@ -232,6 +490,14 @@ function Waste() {
                       {riskConfig.label}风险
                     </span>
                   </div>
+                  <div className="waste-action">
+                    <button
+                      className="detail-btn"
+                      onClick={() => handleViewDetail(item)}
+                    >
+                      详情
+                    </button>
+                  </div>
                 </div>
               );
             })}
@@ -294,6 +560,8 @@ function Waste() {
           </div>
         </div>
       </div>
+
+      {renderDetailModal()}
     </div>
   );
 }
