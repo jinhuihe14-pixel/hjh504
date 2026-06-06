@@ -141,3 +141,21 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+*.egg
+.pytest_cache/
+.mypy_cache/
+
+# Data files (large files - should not be in git)
+backend/data/*.csv
+backend/data/models/
+
+# Trae internal files
+.trae/
