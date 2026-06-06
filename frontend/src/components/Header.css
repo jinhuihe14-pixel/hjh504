@@ -107,6 +107,8 @@
   gap: 12px;
   padding-left: 16px;
   border-left: 1px solid var(--border-color);
+  cursor: pointer;
+  user-select: none;
 }
 
 .user-avatar {
@@ -137,6 +139,88 @@
 .user-role {
   font-size: 12px;
   color: var(--text-secondary);
+}
+
+.user-menu-arrow {
+  font-size: 10px;
+  color: var(--text-secondary);
+  transition: transform 0.2s ease;
+}
+
+.user-menu-wrapper {
+  position: relative;
+}
+
+.user-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 180px;
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-color);
+  z-index: 1001;
+  overflow: hidden;
+  animation: dropdownFadeIn 0.2s ease;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.user-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.user-dropdown-item:hover {
+  background: var(--bg-color);
+}
+
+.user-dropdown-user {
+  cursor: default;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.user-dropdown-user:hover {
+  background: transparent;
+}
+
+.user-dropdown-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.user-dropdown-username {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.user-dropdown-icon {
+  font-size: 16px;
+}
+
+.user-dropdown-divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 4px 0;
 }
 
 @media (max-width: 768px) {

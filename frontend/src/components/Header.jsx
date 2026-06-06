@@ -1,20 +1,23 @@
-import { useState, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import './Header.css'
 
 const breadcrumbMap = {
   '/dashboard': ['首页', '仪表盘'],
-  '/sales-forecast': ['首页', '销量预测'],
-  '/order-suggestion': ['首页', '订货建议'],
-  '/loss-analysis': ['首页', '损耗分析'],
+  '/forecast': ['首页', '销量预测'],
+  '/orders': ['首页', '订货建议'],
+  '/waste': ['首页', '损耗分析'],
   '/weekly-report': ['首页', '周报分析'],
-  '/store-management': ['首页', '门店管理'],
-  '/product-management': ['首页', '商品管理'],
+  '/stores': ['首页', '门店管理'],
+  '/products': ['首页', '商品管理'],
 }
 
 function Header({ sidebarCollapsed, onMenuClick }) {
   const location = useLocation()
+  const navigate = useNavigate()
   const [currentDate, setCurrentDate] = useState('')
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const userMenuRef = useRef(null)
 
   useEffect(() => {
     const updateDate = () => {
@@ -31,7 +34,26 @@ function Header({ sidebarCollapsed, onMenuClick }) {
     return () => clearInterval(timer)
   }, [])
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setUserMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
   const breadcrumbs = breadcrumbMap[location.pathname] || ['首页']
+
+  const username = localStorage.getItem('username') || '管理员'
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('username')
+    setUserMenuOpen(false)
+    navigate('/login')
+  }
 
   return (
     <header className={`header ${sidebarCollapsed ? 'collapsed' : ''}`}>
@@ -56,12 +78,28 @@ function Header({ sidebarCollapsed, onMenuClick }) {
           🔔
           <span className="notification-badge">3</span>
         </button>
-        <div className="user-info">
-          <div className="user-avatar">管</div>
-          <div className="user-details">
-            <span className="user-name">管理员</span>
-            <span className="user-role">系统管理员</span>
+        <div className="user-menu-wrapper" ref={userMenuRef}>
+          <div className="user-info" onClick={() => setUserMenuOpen(!userMenuOpen)}>
+            <div className="user-avatar">管</div>
+            <div className="user-details">
+              <span className="user-name">{username}</span>
+              <span className="user-role">系统管理员</span>
+            </div>
+            <span className="user-menu-arrow">{userMenuOpen ? '▲' : '▼'}</span>
           </div>
+          {userMenuOpen && (
+            <div className="user-dropdown-menu">
+              <div className="user-dropdown-item user-dropdown-user">
+                <span className="user-dropdown-label">当前用户</span>
+                <span className="user-dropdown-username">{username}</span>
+              </div>
+              <div className="user-dropdown-divider" />
+              <div className="user-dropdown-item" onClick={handleLogout}>
+                <span className="user-dropdown-icon">🚪</span>
+                <span>退出登录</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </header>
