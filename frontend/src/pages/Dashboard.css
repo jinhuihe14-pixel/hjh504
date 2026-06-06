@@ -9,6 +9,27 @@
   margin-bottom: 24px;
 }
 
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 16px 0;
+}
+
+.purchase-section {
+  margin-bottom: 24px;
+  background: var(--color-card-bg);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.purchase-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -105,6 +126,10 @@
 @media (max-width: 1024px) {
   .stats-grid {
     grid-template-columns: repeat(3, 1fr);
+  }
+
+  .purchase-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .charts-row {

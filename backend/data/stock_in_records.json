@@ -1,0 +1,26 @@
+[
+  {
+    "id": "35c9e9a1-ea6a-4f78-a476-28fe2f0ef3d6",
+    "po_no": "PO202606060001",
+    "sku": "SKU001",
+    "product_name": "测试商品1",
+    "quantity": 115.0,
+    "unit": "个",
+    "price": 6.5,
+    "amount": 747.5,
+    "store_id": "store_001",
+    "created_at": "2026-06-06T17:32:49.415863"
+  },
+  {
+    "id": "4b00e392-8ddc-4f35-9949-5cc8a6dbd7a3",
+    "po_no": "PO202606060001",
+    "sku": "SKU002",
+    "product_name": "测试商品2",
+    "quantity": 50.0,
+    "unit": "个",
+    "price": 3.5,
+    "amount": 175.0,
+    "store_id": "store_001",
+    "created_at": "2026-06-06T17:32:49.415882"
+  }
+]

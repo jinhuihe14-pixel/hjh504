@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import StatCard from '../components/StatCard';
 import { LineChart, BarChart, PieChart } from '../components/charts';
 import { getSummary, getSalesTrend, getCategorySales, getStoreSales, getWasteTrend } from '../api/dashboard';
+import { purchaseApi } from '../api';
 import { formatNumber, formatPercent, formatMoney } from '../utils/format';
 import './Dashboard.css';
 
@@ -12,23 +13,26 @@ function Dashboard() {
   const [categorySales, setCategorySales] = useState(null);
   const [storeSales, setStoreSales] = useState(null);
   const [wasteTrend, setWasteTrend] = useState(null);
+  const [purchaseOverview, setPurchaseOverview] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [summaryData, trendData, categoryData, storeData, wasteData] = await Promise.all([
+        const [summaryData, trendData, categoryData, storeData, wasteData, purchaseData] = await Promise.all([
           getSummary(),
           getSalesTrend(30),
           getCategorySales(),
           getStoreSales(),
           getWasteTrend(30),
+          purchaseApi.getPurchaseOverview(),
         ]);
         setSummary(summaryData);
         setSalesTrend(trendData);
         setCategorySales(categoryData);
         setStoreSales(storeData);
         setWasteTrend(wasteData);
+        setPurchaseOverview(purchaseData);
       } catch (error) {
         console.error('获取仪表盘数据失败:', error);
       } finally {
@@ -115,6 +119,46 @@ function Dashboard() {
                 suffix={card.suffix}
               />
             ))}
+      </div>
+
+      <div className="purchase-section">
+        <h3 className="section-title">采购概况</h3>
+        <div className="purchase-stats-grid">
+          {loading || !purchaseOverview
+            ? Array(4).fill(null).map((_, index) => (
+                <div key={index} className="card-skeleton" />
+              ))
+            : (
+              <>
+                <StatCard
+                  title="本周待确认采购单"
+                  value={formatNumber(purchaseOverview.pending_confirm_count)}
+                  icon="⏳"
+                  theme="warning"
+                  suffix="单"
+                />
+                <StatCard
+                  title="配送中采购单"
+                  value={formatNumber(purchaseOverview.in_delivery_count)}
+                  icon="🚚"
+                  theme="info"
+                  suffix="单"
+                />
+                <StatCard
+                  title="本月采购总金额"
+                  value={formatMoney(purchaseOverview.monthly_total_amount)}
+                  icon="💰"
+                  theme="success"
+                />
+                <StatCard
+                  title="平均到货率"
+                  value={formatPercent(purchaseOverview.average_arrival_rate)}
+                  icon="📦"
+                  theme="primary"
+                />
+              </>
+            )}
+        </div>
       </div>
 
       <div className="charts-row">

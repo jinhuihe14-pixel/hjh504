@@ -8,6 +8,7 @@ from app.api.orders import router as orders_router
 from app.api.waste import router as waste_router
 from app.api.dashboard import router as dashboard_router
 from app.api.auth import router as auth_router
+from app.api.purchases import router as purchases_router
 from app.services.data_service import DataService
 
 
@@ -32,6 +33,7 @@ app.include_router(orders_router, prefix="/api/orders", tags=["订货建议"])
 app.include_router(waste_router, prefix="/api/waste", tags=["损耗分析"])
 app.include_router(dashboard_router, prefix="/api/dashboard", tags=["仪表盘"])
 app.include_router(auth_router, prefix="/api/auth", tags=["认证"])
+app.include_router(purchases_router, prefix="/api/purchases", tags=["采购管理"])
 
 
 @app.on_event("startup")

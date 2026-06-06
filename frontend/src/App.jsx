@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Forecast from './pages/Forecast';
 import Orders from './pages/Orders';
+import Purchases from './pages/Purchases';
 import Waste from './pages/Waste';
 import WeeklyReport from './pages/WeeklyReport';
 import Stores from './pages/Stores';
@@ -56,6 +57,7 @@ function App() {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="forecast" element={<Forecast />} />
           <Route path="orders" element={<Orders />} />
+          <Route path="purchases" element={<Purchases />} />
           <Route path="waste" element={<Waste />} />
           <Route path="weekly-report" element={<WeeklyReport />} />
           <Route path="stores" element={<Stores />} />

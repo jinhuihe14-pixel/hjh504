@@ -183,3 +183,80 @@ class ApiResponse(BaseModel):
     code: int = 200
     message: str = "success"
     data: Optional[Any] = None
+
+
+class PurchaseOrderItem(BaseModel):
+    sku: str
+    product_name: str
+    category: str
+    suggested_order: float
+    adjusted_order: float
+    actual_arrival: Optional[float] = 0.0
+    unit: str
+    price: float
+    amount: float
+    adjust_reason: Optional[str] = ""
+    is_adjusted: Optional[bool] = False
+
+
+class PurchaseOrder(BaseModel):
+    id: str
+    po_no: str
+    store_id: str
+    store_name: str
+    supplier: str
+    category: Optional[str] = ""
+    total_amount: float
+    total_quantity: float
+    estimated_arrival_date: date
+    status: str
+    remark: Optional[str] = ""
+    items: List[PurchaseOrderItem]
+    created_at: datetime
+    updated_at: datetime
+
+
+class CreatePurchaseOrderRequest(BaseModel):
+    store_id: str
+    store_name: str
+    category: Optional[str] = ""
+    items: List[PurchaseOrderItem]
+    remark: Optional[str] = ""
+
+
+class PurchaseOrderListResponse(BaseModel):
+    total: int
+    items: List[PurchaseOrder]
+
+
+class UpdatePurchaseOrderStatusRequest(BaseModel):
+    status: str
+
+
+class ArrivalItem(BaseModel):
+    sku: str
+    actual_arrival: float
+
+
+class ArrivalConfirmationRequest(BaseModel):
+    items: List[ArrivalItem]
+
+
+class PurchaseOverview(BaseModel):
+    pending_confirm_count: int
+    in_delivery_count: int
+    monthly_total_amount: float
+    average_arrival_rate: float
+
+
+class StockInRecord(BaseModel):
+    id: str
+    po_no: str
+    sku: str
+    product_name: str
+    quantity: float
+    unit: str
+    price: float
+    amount: float
+    store_id: str
+    created_at: datetime

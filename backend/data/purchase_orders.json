@@ -1,0 +1,45 @@
+[
+  {
+    "id": "2a233952-6802-4c0b-b692-b83f0ba1be2b",
+    "po_no": "PO202606060001",
+    "store_id": "store_001",
+    "store_name": "便利店1号店",
+    "supplier": "速食饮料供应商",
+    "category": "速食饮料",
+    "total_amount": 955.0,
+    "total_quantity": 170.0,
+    "estimated_arrival_date": "2026-06-08",
+    "status": "已到货",
+    "remark": "测试采购单",
+    "items": [
+      {
+        "sku": "SKU001",
+        "product_name": "测试商品1",
+        "category": "速食饮料",
+        "suggested_order": 100.0,
+        "adjusted_order": 120.0,
+        "actual_arrival": 115,
+        "unit": "个",
+        "price": 6.5,
+        "amount": 780.0,
+        "adjust_reason": "供应商最小起订量为120",
+        "is_adjusted": true
+      },
+      {
+        "sku": "SKU002",
+        "product_name": "测试商品2",
+        "category": "速食饮料",
+        "suggested_order": 50.0,
+        "adjusted_order": 50.0,
+        "actual_arrival": 50,
+        "unit": "个",
+        "price": 3.5,
+        "amount": 175.0,
+        "adjust_reason": "",
+        "is_adjusted": false
+      }
+    ],
+    "created_at": "2026-06-06T17:32:49.414357",
+    "updated_at": "2026-06-06T17:32:49.415889"
+  }
+]

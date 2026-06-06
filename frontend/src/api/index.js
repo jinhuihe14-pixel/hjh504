@@ -1,5 +1,6 @@
 import { getForecast, getSkusByCategory, getBatchForecast } from './forecast';
 import { getOrderSuggestions, getSummary, getStoreOrders, getCategoryOrders } from './orders';
+import purchaseApi from './purchases';
 
 const BASE_URL = '/api';
 
@@ -53,5 +54,7 @@ export const orderApi = {
   getStoreOrders,
   getCategoryOrders,
 };
+
+export { purchaseApi };
 
 export default api;

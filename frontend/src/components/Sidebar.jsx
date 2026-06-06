@@ -5,10 +5,11 @@ const menuItems = [
   { path: '/dashboard', name: '仪表盘', icon: '📊' },
   { path: '/forecast', name: '销量预测', icon: '📈' },
   { path: '/orders', name: '订货建议', icon: '📦' },
+  { path: '/purchases', name: '采购管理', icon: '🛒' },
   { path: '/waste', name: '损耗分析', icon: '📉' },
   { path: '/weekly-report', name: '周报分析', icon: '📋' },
   { path: '/stores', name: '门店管理', icon: '🏪' },
-  { path: '/products', name: '商品管理', icon: '🛒' },
+  { path: '/products', name: '商品管理', icon: '🛍️' },
 ]
 
 function Sidebar({ collapsed, onToggle, mobileOpen }) {
